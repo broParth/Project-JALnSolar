@@ -1,0 +1,15 @@
+# Local database: holds accounts (emails, password hashes) and history. Never commit it.
+*.sqlite3
+*.sqlite3-journal
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Secrets such as JAL_SECRET_KEY or SMTP passwords
+.env
+
+# Random key that signs login cookies (generated on first run). Never commit it.
+.jal_secret_key

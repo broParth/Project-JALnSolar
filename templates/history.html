@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>History · Project JAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-page="history">
+<div class="app">
+  {% include "_sidebar.html" %}
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Event history</h1>
+        <p>Every entry for <strong>{{ site.name }}</strong>, newest date first.</p>
+      </div>
+      <div class="toolbar">
+        <select id="filter-type" aria-label="Filter by event type">
+          <option value="">All events</option>
+          <option value="rainfall">Rainfall</option>
+          <option value="solar">Solar generation</option>
+          <option value="solar_use">Solar energy use</option>
+          <option value="usage">Water use</option>
+          <option value="weather_import">Weather estimates</option>
+          <option value="tank_adjust">Tank adjustments</option>
+          <option value="debris_clean">Catcher cleaned</option>
+        </select>
+        <button type="button" class="btn btn-ghost" id="export-csv">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-head"><div><h2>Water in and out by day</h2><p>Simulated rainfall collection vs usage (litres)</p></div></div>
+        <div class="chart-box"><canvas id="chart-water" aria-label="Daily water collected and used"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h2>Rainfall by day</h2><p>Simulated rainfall events (mm)</p></div></div>
+        <div class="chart-box"><canvas id="chart-rain" aria-label="Daily rainfall"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div><h2>All events</h2><p id="history-count">Loading…</p></div></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>When</th><th>Type</th><th>Village</th><th class="r">Rain (mm)</th><th class="r">Collected (L)</th><th class="r">Used (L)</th><th class="r">Unmet (L)</th><th class="r">Solar (kWh)</th><th>Details</th><th><span class="sr-only" style="position:absolute;left:-9999px">Actions</span></th>
+            </tr>
+          </thead>
+          <tbody id="history-body"><tr><td colspan="10" class="empty">Loading…</td></tr></tbody>
+        </table>
+      </div>
+      <p class="small muted" style="margin-top:12px">Deleting an entry recalculates the tank levels and battery as if it had never happened.</p>
+    </div>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

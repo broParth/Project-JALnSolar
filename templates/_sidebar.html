@@ -1,0 +1,31 @@
+{# Shared sidebar for the signed-in pages. Expects: name, site, sites, active. #}
+<aside class="sidebar">
+  <a class="brand" href="{{ url_for('dashboard') }}">
+    <span class="brand-mark"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M12 2.7s-6 6.6-6 11.1a6 6 0 0 0 12 0C18 9.3 12 2.7 12 2.7z"/></svg></span>
+    <span><span class="brand-name">JAL</span><br><span class="brand-sub">Smart Water Management</span></span>
+  </a>
+  <div class="site-switch">
+    <label for="site-select">Site</label>
+    <select id="site-select" aria-label="Choose site">
+      {% for s in sites %}<option value="{{ s.id }}"{% if s.id == site.id %} selected{% endif %}>{{ s.name }}</option>{% endfor %}
+      <option value="__manage">Manage sites…</option>
+    </select>
+  </div>
+  <nav class="nav">
+    <a href="{{ url_for('dashboard') }}"{% if active == 'dashboard' %} class="active"{% endif %}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+    <a href="{{ url_for('simulation') }}"{% if active == 'simulation' %} class="active"{% endif %}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.7s-6 6.6-6 11.1a6 6 0 0 0 12 0C18 9.3 12 2.7 12 2.7z"/></svg>Simulation</a>
+    <a href="{{ url_for('history') }}"{% if active == 'history' %} class="active"{% endif %}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>History</a>
+    <a href="{{ url_for('settings_page') }}"{% if active == 'settings' %} class="active"{% endif %}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.2 4.2l2.8 2.8M17 17l2.8 2.8M1 12h4M19 12h4M4.2 19.8L7 17M17 7l2.8-2.8"/></svg>Settings</a>
+  </nav>
+  <div class="sidebar-foot">
+    {% set initials = (name.split() | map('first') | list)[:2] | join | upper %}
+    <a class="profile-link{% if active == 'profile' %} active{% endif %}" href="{{ url_for('profile_page') }}" title="Profile settings">
+      <span class="avatar" aria-hidden="true">{{ initials or 'U' }}</span>
+      <span class="profile-text"><span class="who">{{ name }}</span><span class="profile-hint">Profile settings</span></span>
+    </a>
+    <form method="post" action="{{ url_for('logout') }}" class="signout-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="signout">Sign out</button>
+    </form>
+  </div>
+</aside>

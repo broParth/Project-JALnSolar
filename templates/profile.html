@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>Profile · Project JAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-page="profile">
+<div class="app">
+  {% include "_sidebar.html" %}
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Profile settings</h1>
+        <p>Your account details and password. These apply to all of your sites.</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:20px">
+      <div class="profile-head">
+        <span class="avatar lg" id="profile-avatar" aria-hidden="true">{{ ((user.display_name.split() | map('first') | list)[:2] | join | upper) or 'U' }}</span>
+        <div>
+          <h2 id="profile-name">{{ user.display_name }}</h2>
+          <p class="muted" id="profile-identifier">{{ user.identifier }}</p>
+        </div>
+      </div>
+      <div class="profile-facts">
+        <div><b>{{ user.created_at[:10] }}</b><span>Member since</span></div>
+        <div><b>{{ site_count }}</b><span>Site{{ '' if site_count == 1 else 's' }} · <a href="{{ url_for('settings_page') }}#sites">manage</a></span></div>
+        <div><b>{{ '{:,}'.format(event_count) }}</b><span>Entries recorded</span></div>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="card">
+        <div class="card-head"><div><h2>Account details</h2><p>Your name is shown in the sidebar and greeting. Your email or username is what you sign in with.</p></div></div>
+        <form id="profile-form" novalidate>
+          <div class="fields">
+            <div class="field full"><label for="p_name">Name</label><input id="p_name" name="display_name" value="{{ user.display_name }}" maxlength="80" autocomplete="name" required></div>
+            <div class="field full"><label for="p_identifier">Email or username</label><input id="p_identifier" name="identifier" value="{{ user.identifier }}" maxlength="120" autocomplete="username" required>
+              <span class="hint">Password reset links can only be emailed to an email address.</span></div>
+            <div class="field full"><label for="p_confirm_pw">Current password <span class="hint">(needed only when changing your email/username)</span></label><input id="p_confirm_pw" name="current_password" type="password" autocomplete="current-password"></div>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" type="submit">Save details</button></div>
+          <div class="result" id="profile-result" role="status"></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div><h2>Change password</h2><p>Enter your current password, then the new one twice.</p></div></div>
+        <form id="password-form" novalidate>
+          <div class="fields">
+            <div class="field full"><label for="p_current">Current password</label><input id="p_current" name="current_password" type="password" autocomplete="current-password" required></div>
+            <div class="field full"><label for="p_new">New password <span class="hint">(at least 8 characters)</span></label><input id="p_new" name="new_password" type="password" minlength="8" autocomplete="new-password" required></div>
+            <div class="field full"><label for="p_confirm">Confirm new password</label><input id="p_confirm" name="confirm_password" type="password" minlength="8" autocomplete="new-password" required></div>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" type="submit">Change password</button></div>
+          <div class="result" id="password-result" role="status"></div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

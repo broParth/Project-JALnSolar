@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>Settings · Project JAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-page="settings">
+<div class="app">
+  {% include "_sidebar.html" %}
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Settings</h1>
+        <p>Sites, location, canopy, energy, tank setup and live weather lookup. Changes apply to <strong>{{ site.name }}</strong>.</p>
+      </div>
+    </div>
+
+    <div class="card" id="sites" style="margin-bottom:20px">
+      <div class="card-head"><div><h2>Sites</h2><p>Each site is a separate canopy with its own 5 tanks, battery and history. Use the selector at the top of the sidebar to switch.</p></div></div>
+      <div id="site-list" class="site-list"><div class="empty">Loading…</div></div>
+      <form id="new-site-form" class="toolbar" style="margin-top:14px">
+        <input name="name" placeholder="New site name, e.g. Mysuru school" aria-label="New site name" required style="flex:1 1 220px;width:auto">
+        <input name="village" placeholder="Village / town (optional)" aria-label="Village or town" style="flex:1 1 180px;width:auto">
+        <button class="btn btn-primary" type="submit">Add site</button>
+      </form>
+    </div>
+
+    <div class="grid grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-head"><div><h2>Site details</h2><p>Location, canopy and energy used for this site's simulations and weather estimates</p></div></div>
+        <form id="settings-form">
+          <div class="fields">
+            <div class="field full"><label for="s_name">Site name</label><input id="s_name" name="name" value="{{ site.name }}" maxlength="80" required></div>
+            <div class="field full"><label for="s_village">Village / town</label><input id="s_village" name="village" value="{{ settings.village or '' }}" placeholder="e.g. Hosakote, Karnataka"></div>
+            <div class="field"><label for="s_lat">Latitude</label><input id="s_lat" name="latitude" type="number" step="any" min="-90" max="90" value="{{ settings.latitude if settings.latitude is not none else '' }}" placeholder="13.07"></div>
+            <div class="field"><label for="s_lon">Longitude</label><input id="s_lon" name="longitude" type="number" step="any" min="-180" max="180" value="{{ settings.longitude if settings.longitude is not none else '' }}" placeholder="77.80"></div>
+            <div class="field"><label for="s_area">Canopy area (m²)</label><input id="s_area" name="canopy_area_m2" type="number" step="any" min="1" value="{{ settings.canopy_area_m2 or 100 }}" required></div>
+            <div class="field"><label for="s_eff">Collection efficiency (%)</label><input id="s_eff" name="collection_efficiency" type="number" step="any" min="0" max="100" value="{{ settings.collection_efficiency if settings.collection_efficiency is not none else 80 }}" required></div>
+            <div class="field"><label for="s_battery">Battery capacity (kWh)</label><input id="s_battery" name="battery_capacity_kwh" type="number" step="any" min="0" value="{{ site.battery_capacity_kwh }}" required></div>
+            <div class="field"><label for="s_pump">Pump energy (kWh per 1,000 L)</label><input id="s_pump" name="pump_kwh_per_kl" type="number" step="any" min="0" value="{{ site.pump_kwh_per_kl }}" required></div>
+          </div>
+          <div class="form-actions"><button class="btn btn-primary" type="submit">Save settings</button></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div><h2>Tanks</h2><p>Capacity and current level of each tank. Changing a level adds a "Tank adjustment" entry to history, which you can delete to undo.</p></div></div>
+        <form id="tanks-form">
+          <div class="grid" id="tank-fields" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px"><div class="empty">Loading…</div></div>
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Update tanks</button>
+            <button class="btn btn-ghost" type="button" id="reset-btn" style="color:var(--danger);border-color:var(--danger)">Reset this site</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div><h2>Weather-based collection estimate</h2><p>Daily precipitation for an Indian place name, 6-digit PIN code or coordinates. Open-Meteo first, with NASA POWER filling any missing past days. No API key needed.</p></div>
+        <button type="button" class="btn btn-ghost btn-sm" id="use-saved-location">Use saved location</button>
+      </div>
+      <form id="weather-form">
+        <div class="fields three">
+          <div class="field"><label for="w_place">Place name or PIN code</label><input id="w_place" name="place" maxlength="120" placeholder="e.g. Mysuru or 570001"></div>
+          <div class="field"><label for="w_lat">Latitude <span class="hint">optional</span></label><input id="w_lat" name="latitude" type="number" step="any" min="-90" max="90"></div>
+          <div class="field"><label for="w_lon">Longitude <span class="hint">optional</span></label><input id="w_lon" name="longitude" type="number" step="any" min="-180" max="180"></div>
+          <div class="field"><label for="w_start">Start date</label><input id="w_start" name="start" type="date"></div>
+          <div class="field"><label for="w_end">End date</label><input id="w_end" name="end" type="date"></div>
+          <div class="field" style="justify-content:flex-end"><button class="btn btn-solar" type="submit" style="justify-content:center">Fetch rainfall</button></div>
+        </div>
+        <p class="small muted" style="margin-top:10px">If coordinates are given they are used directly. Otherwise the place is looked up in India with Open-Meteo, then OpenStreetMap as a backup; a PIN code is first turned into its post office and district (a PIN covers a postal area, not an exact plot). Rainfall values are modelled grid estimates, not a local rain gauge: compare with IMD observations for field accuracy.</p>
+        <p class="small muted credits">Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0) · backup rainfall from <a href="https://power.larc.nasa.gov/" target="_blank" rel="noopener">NASA POWER</a> · backup locations © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a></p>
+      </form>
+      <div id="weather-result" style="margin-top:16px"></div>
+    </div>
+  </main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

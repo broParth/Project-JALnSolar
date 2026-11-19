@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>Simulation · Project JAL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body data-page="simulation">
+<div class="app">
+  {% include "_sidebar.html" %}
+
+  <main class="main">
+    <div class="page-head">
+      <div>
+        <h1>Simulation</h1>
+        <p>Record rainfall, solar generation and village water use for <strong>{{ site.name }}</strong>. Entries can be backdated; tank levels are recalculated in date order.</p>
+      </div>
+    </div>
+
+    <div class="grid grid-main">
+      <div class="stack">
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Rainfall event</h2><p>Five collectors, one above each tank, share the canopy equally and fill their tanks at the same time. A full tank passes its extra on to the next tank; extra from Tank 5 is overflow.<br>Water collected = rainfall (mm) × canopy area (m²) × efficiency</p></div>
+          </div>
+          <div class="toolbar" style="margin-bottom:16px">
+            <span class="small muted">Quick presets:</span>
+            <button type="button" class="btn btn-ghost btn-sm" data-preset="5,60">Light shower</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-preset="25,180">Monsoon spell</button>
+            <button type="button" class="btn btn-ghost btn-sm" data-preset="80,360">Heavy storm</button>
+          </div>
+          <form id="rain-form" novalidate>
+            <div class="fields three">
+              <div class="field"><label for="rainfall_mm">Rainfall (mm)</label><input id="rainfall_mm" name="rainfall_mm" type="number" min="0" step="any" value="20" required></div>
+              <div class="field"><label for="duration_minutes">Duration (minutes) <span class="hint">recorded only</span></label><input id="duration_minutes" name="duration_minutes" type="number" min="0" step="1" value="120"></div>
+              <div class="field"><label for="village">Village</label><input id="village" name="village" value="{{ settings.village or '' }}" placeholder="e.g. Hosakote"></div>
+              <div class="field"><label for="canopy_area_m2">Total canopy area (m²) <span class="hint">split over 5 collectors</span></label><input id="canopy_area_m2" name="canopy_area_m2" type="number" min="1" step="any" value="{{ settings.canopy_area_m2 or 100 }}"></div>
+              <div class="field"><label for="collection_efficiency">Efficiency (%)</label><input id="collection_efficiency" name="collection_efficiency" type="number" min="0" max="100" step="any" value="{{ settings.collection_efficiency or 80 }}"></div>
+              <div class="field"><label for="rain_date">Date and time</label>
+                <div class="dt-row"><input id="rain_date" name="event_date" type="date"><input name="event_time" type="time" aria-label="Rainfall time"></div>
+              </div>
+            </div>
+
+            <div class="preview">
+              <div><div class="small">Estimated collection</div><strong class="num" id="preview-litres">–</strong></div>
+              <div style="text-align:right"><div class="small">Storage check</div><span id="preview-note">–</span></div>
+            </div>
+
+            <div class="form-actions"><button class="btn btn-primary" type="submit">Simulate rainfall</button></div>
+            <div class="result" id="rain-result" role="status"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Solar generation</h2><p>Record energy from the canopy panels. Whatever isn't given to homes or sensors charges the battery, which then powers the water pump.</p></div>
+          </div>
+          <form id="solar-form" novalidate>
+            <div class="fields three">
+              <div class="field"><label for="solar_kwh">Solar generated (kWh)</label><input id="solar_kwh" name="solar_kwh" type="number" min="0" step="any" value="6" required></div>
+              <div class="field"><label for="village_energy_kwh">To village homes (kWh) <span class="hint">blank = 75%</span></label><input id="village_energy_kwh" name="village_energy_kwh" type="number" min="0" step="any" placeholder="auto"></div>
+              <div class="field"><label for="system_energy_kwh">To sensors / IoT (kWh) <span class="hint">blank = 10%</span></label><input id="system_energy_kwh" name="system_energy_kwh" type="number" min="0" step="any" placeholder="auto"></div>
+              <div class="field"><label for="s_village">Village</label><input id="s_village" name="village" value="{{ settings.village or '' }}" placeholder="e.g. Hosakote"></div>
+              <div class="field"><label for="solar_date">Date and time</label>
+                <div class="dt-row"><input id="solar_date" name="event_date" type="date"><input name="event_time" type="time" aria-label="Solar time"></div>
+              </div>
+            </div>
+
+            <div style="margin-top:16px">
+              <div class="small" style="font-weight:700;color:var(--ink-2)">Solar allocation</div>
+              <div class="split-bar"><span id="split-village" style="background:var(--solar)"></span><span id="split-system" style="background:var(--leaf)"></span></div>
+              <div class="legend"><span><i style="background:var(--solar)"></i>Village homes</span><span><i style="background:var(--leaf)"></i>Sensors / IoT</span><span><i style="background:var(--line)"></i>To battery</span></div>
+              <div class="small muted" id="split-text" style="margin-top:4px"></div>
+            </div>
+
+            <div class="form-actions"><button class="btn btn-solar" type="submit">Record solar generation</button></div>
+            <div class="result" id="solar-result" role="status"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div><h2>Solar energy use</h2><p>Record energy used by the sensors and/or the system. It comes out of the battery; if the battery is short at that time, the rest is counted as grid energy.</p></div>
+          </div>
+          <form id="solar-use-form" novalidate>
+            <div class="fields three">
+              <div class="field"><label for="energy_kwh">Energy used (kWh)</label><input id="energy_kwh" name="energy_kwh" type="number" min="0" step="any" value="1" required></div>
+              <div class="field"><label for="purpose">Purpose</label><input id="purpose" name="purpose" maxlength="120" placeholder="e.g. water-level sensors, lighting" required></div>
+              <div class="field"><label for="used_by">Used by</label>
+                <select id="used_by" name="used_by">{% for u in solar_users %}<option value="{{ u }}">{{ u }}</option>{% endfor %}</select></div>
+              <div class="field"><label for="su_date">Date and time</label>
+                <div class="dt-row"><input id="su_date" name="event_date" type="date"><input name="event_time" type="time" aria-label="Solar use time"></div>
+              </div>
+            </div>
+            <div class="form-actions"><button class="btn btn-solar" type="submit">Record solar use</button></div>
+            <div class="result" id="solar-use-result" role="status"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div><h2>Water usage</h2><p>Drawn from Tank 5 first, down to Tank 1. If the tanks run short, the shortfall is recorded as unmet demand. Pumping uses {{ site.pump_kwh_per_kl }} kWh per 1,000 L, from the battery first, then the grid.</p></div></div>
+          <form id="usage-form" novalidate>
+            <div class="fields three">
+              <div class="field"><label for="used_l">Water needed (L)</label><input id="used_l" name="used_l" type="number" min="1" step="any" value="500" required></div>
+              <div class="field"><label for="u_village">Household / village</label><input id="u_village" name="village" value="{{ settings.village or '' }}" placeholder="e.g. Ward 3 homes"></div>
+              <div class="field"><label for="u_date">Date and time</label>
+                <div class="dt-row"><input id="u_date" name="event_date" type="date"><input name="event_time" type="time" aria-label="Usage time"></div>
+              </div>
+            </div>
+            <div class="form-actions"><button class="btn btn-danger" type="submit">Record usage</button></div>
+            <div class="result" id="usage-result" role="status"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div><h2>Village water-demand calculator</h2><p>A planning estimate of how much water the village needs. Nothing is saved; change the assumptions to match your own research.</p></div></div>
+          <form id="demand-form" novalidate>
+            <div class="fields three">
+              <div class="field"><label for="d_pop">Population</label><input id="d_pop" name="population" type="number" min="1" step="1" value="500"></div>
+              <div class="field"><label for="d_lpcd">Domestic use (L per person per day)</label><input id="d_lpcd" name="lpcd" type="number" min="0" step="any" value="55"></div>
+              <div class="field"><label for="d_crop">Crop water per year (m³) <span class="hint">0 if not known</span></label><input id="d_crop" name="crop_m3" type="number" min="0" step="any" value="0"></div>
+            </div>
+          </form>
+          <div class="demand-grid" style="margin-top:14px">
+            <div><div class="small">Daily demand</div><strong class="num" id="d-daily">–</strong></div>
+            <div><div class="small">Yearly demand</div><strong class="num" id="d-yearly">–</strong></div>
+            <div><div class="small">Full tanks last</div><strong class="num" id="d-days">–</strong></div>
+          </div>
+          <p class="small muted" id="d-compare" style="margin-top:10px"></p>
+          <div class="form-actions"><button type="button" class="btn btn-ghost btn-sm" id="d-use">Use daily demand as "Water needed"</button></div>
+          <p class="small muted">55 L per person per day is a common rural planning figure in India, not a fixed standard. Crop water depends on the crop, area, season and irrigation method.</p>
+        </div>
+      </div>
+
+      <div class="stack" style="align-self:start">
+      <div class="card">
+        <div class="card-head"><div><h2>Live tank levels</h2><p id="sim-stored">Loading…</p></div></div>
+        <div class="tanks" id="tanks"></div>
+        <div class="flow-note"><span>Fill: one collector per tank, extra passes</span><span class="arrow">1 → 5</span><span>· Draw</span><span class="arrow">5 → 1</span></div>
+        <p class="small muted" style="margin-top:16px">Extra water that Tank 5 can't hold is reported as overflow needing recharge/overflow handling. It is not counted as safe groundwater recharge.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div><h2>Live solar output</h2><p id="solar-live-sub">Loading…</p></div></div>
+        <div class="solar-scene idle" id="solar-scene">
+          <svg viewBox="0 0 320 170" role="img" aria-label="Animation of the solar canopy sending energy to village homes and sensors">
+            <defs>
+              <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff4d6"/><stop offset="1" stop-color="#eef6fb"/></linearGradient>
+              <radialGradient id="sunGlow"><stop offset="0" stop-color="#ffd54a" stop-opacity=".9"/><stop offset="1" stop-color="#ffd54a" stop-opacity="0"/></radialGradient>
+            </defs>
+            <rect width="320" height="170" fill="url(#sky)"/>
+            <circle class="sun-halo" cx="46" cy="38" r="34" fill="url(#sunGlow)"/>
+            <g class="sun-spin" stroke="#f2a516" stroke-width="3" stroke-linecap="round">
+              <line x1="46" y1="10" x2="46" y2="16"/><line x1="46" y1="60" x2="46" y2="66"/><line x1="18" y1="38" x2="24" y2="38"/><line x1="68" y1="38" x2="74" y2="38"/>
+              <line x1="26" y1="18" x2="30" y2="22"/><line x1="62" y1="54" x2="66" y2="58"/><line x1="26" y1="58" x2="30" y2="54"/><line x1="62" y1="22" x2="66" y2="18"/>
+            </g>
+            <circle cx="46" cy="38" r="13" fill="#ffc94a"/>
+            <g class="beams" stroke="#f7c04a" stroke-width="2" stroke-linecap="round">
+              <line x1="62" y1="48" x2="112" y2="78"/><line x1="58" y1="54" x2="104" y2="92"/><line x1="66" y1="42" x2="124" y2="70"/>
+            </g>
+            <polygon points="96,96 176,72 184,90 104,116" fill="#123d5a" stroke="#1c8fd6" stroke-width="2"/>
+            <g stroke="#3d86b8" stroke-width="1"><line x1="122" y1="88" x2="130" y2="108"/><line x1="148" y1="80" x2="156" y2="100"/><line x1="100" y1="106" x2="180" y2="81"/></g>
+            <polygon class="panel-glow" id="panel-glow" points="96,96 176,72 184,90 104,116" fill="#ffd54a"/>
+            <line x1="140" y1="100" x2="140" y2="150" stroke="#7d97a8" stroke-width="5" stroke-linecap="round"/>
+            <path d="M184 88 H214 V122 H252" fill="none" stroke="#e3d3ad" stroke-width="6" stroke-linejoin="round"/>
+            <path class="energy-flow" d="M184 88 H214 V122 H252" fill="none" stroke="#f2a516" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M214 122 V146 H262" fill="none" stroke="#cfe3d6" stroke-width="6" stroke-linejoin="round"/>
+            <path class="energy-flow alt" d="M214 122 V146 H262" fill="none" stroke="#23a26b" stroke-width="3" stroke-linejoin="round"/>
+            <g><polygon points="250,112 274,94 298,112" fill="#d6453d"/><rect x="254" y="112" width="40" height="28" fill="#fff" stroke="#c2d3dd"/><rect class="house-window" x="262" y="118" width="10" height="10" rx="1"/><rect x="278" y="124" width="9" height="16" fill="#9fb8c8"/></g>
+            <g><rect x="264" y="144" width="14" height="10" rx="2" fill="#0d2c3f"/><line x1="271" y1="144" x2="271" y2="134" stroke="#0d2c3f" stroke-width="2"/>
+              <circle class="sensor-pulse" cx="271" cy="133" r="3" fill="none" stroke="#23a26b" stroke-width="2"/><circle class="sensor-pulse d2" cx="271" cy="133" r="3" fill="none" stroke="#23a26b" stroke-width="2"/></g>
+            <path d="M8 156 H312" stroke="#9ec27a" stroke-width="4" stroke-linecap="round"/>
+            <g font-size="10" font-weight="700" fill="#4a6475"><text x="216" y="84">Homes</text><text x="284" y="168" text-anchor="end">Sensors</text></g>
+          </svg>
+          <div class="solar-burst" id="solar-burst" aria-hidden="true"></div>
+        </div>
+        <div class="solar-readout">
+          <div><div class="stat-label">Today</div><div class="stat-value num"><span id="solar-today">0</span><small>kWh</small></div></div>
+          <div><div class="stat-label">All time</div><div class="stat-value num"><span id="solar-total">0</span><small>kWh</small></div></div>
+        </div>
+        <div class="split-bar"><span id="live-homes" style="background:var(--solar)"></span><span id="live-sensors" style="background:var(--leaf)"></span></div>
+        <div class="small muted" id="live-split-text"></div>
+        <div style="margin-top:14px">
+          <div class="small" style="font-weight:700;color:var(--ink-2);display:flex;justify-content:space-between"><span>Battery</span><span class="num" id="live-battery-text">–</span></div>
+          <div class="split-bar"><span id="live-battery" style="background:var(--leaf)"></span></div>
+          <div class="small muted" id="live-pump-text"></div>
+        </div>
+      </div>
+
+      <div class="card" id="debris-card">
+        <div class="card-head"><div><h2>Debris catcher <span class="badge estimate">Estimate</span></h2><p id="debris-sub">Loading…</p></div></div>
+        <div class="demand-grid">
+          <div><div class="small">Debris caught</div><strong class="num" id="debris-kg">–</strong></div>
+          <div><div class="small">Average capture</div><strong class="num" id="debris-pct">–</strong></div>
+          <div><div class="small">Status</div><strong id="debris-status">–</strong></div>
+        </div>
+        <div class="split-bar" style="margin-top:12px"><span id="debris-bar" style="background:var(--solar)"></span></div>
+        <div class="form-actions"><button type="button" class="btn btn-ghost btn-sm" id="debris-clean">Mark catcher cleaned</button></div>
+        <p class="small muted">Worked out from rainfall and canopy area using simple assumptions; these are not sensor readings. A real cleaning alert needs a debris-level sensor or a set maintenance schedule.</p>
+      </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
