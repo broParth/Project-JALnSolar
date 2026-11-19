@@ -34,11 +34,11 @@ project_jal/
 ## Running it on another computer (team setup)
 The code comes from GitHub; the database is shared separately because it is never committed.
 
-1. **Get the code** from the `feature/my-changes` branch:
+1. **Get the code** from the `feature/changes-parth` branch:
    ```powershell
-   git clone -b feature/my-changes https://github.com/broParth/Project-JALnSolar.git
+   git clone -b feature/changes-parth https://github.com/broParth/Project-JALnSolar.git
    ```
-   Or on GitHub switch the branch dropdown to `feature/my-changes`, then **Code → Download ZIP**.
+   Or on GitHub switch the branch dropdown to `feature/changes-parth`, then **Code → Download ZIP**.
 2. **Add the shared database (optional).** Unzip `project_jal_database.zip` and put `project_jal.sqlite3`
    in the project folder, **next to `app.py`**, with exactly that name. Skip this to start with an empty
    database and register a new account.

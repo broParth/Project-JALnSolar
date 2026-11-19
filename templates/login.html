@@ -6,7 +6,7 @@
   <title>{% if mode == 'register' %}Create account{% elif mode == 'forgot' %}Forgot password{% elif mode == 'reset' %}Set new password{% else %}Sign in{% endif %} · Project JAL</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
@@ -128,6 +128,7 @@
           New to JAL? <a href="{{ url_for('register') }}">Create an account</a>
         {% endif %}
       </p>
+      <p class="auth-replay"><a href="{{ url_for('home', replay=1) }}">Replay intro</a></p>
       {% endif %}
     </div>
   </section>

@@ -13,3 +13,6 @@ venv/
 
 # Random key that signs login cookies (generated on first run). Never commit it.
 .jal_secret_key
+
+# Database and stylesheet copies made before upgrades (local safety copies)
+backups/

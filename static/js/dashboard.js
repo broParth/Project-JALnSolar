@@ -103,6 +103,19 @@
       </div>`;
     }).join("");
     requestAnimationFrame(() => $$(".tank-fill", container).forEach((f) => { f.style.height = f.dataset.pct + "%"; }));
+    renderCollectors(tanks);
+  }
+
+  // Five-collector drawing: fill each tank to its level.
+  function renderCollectors(tanks) {
+    const svg = $("#collectors");
+    if (!svg) return;
+    const fills = $$(".cw-fill", svg), labels = $$(".cw-pct", svg);
+    tanks.forEach((t, i) => {
+      const pct = t.capacity_l > 0 ? Math.min(100, (t.level_l / t.capacity_l) * 100) : 0;
+      if (fills[i]) requestAnimationFrame(() => { fills[i].style.transform = `scaleY(${pct / 100})`; });
+      if (labels[i]) labels[i].textContent = pct > 0 && pct < 1 ? "<1%" : `${Math.round(pct)}%`;
+    });
   }
 
   function renderEventList(container, events) {
@@ -228,7 +241,7 @@
     const canvas = document.getElementById(id);
     if (!canvas || typeof Chart === "undefined") return;
     if (charts[id]) charts[id].destroy();
-    Chart.defaults.font.family = '"Plus Jakarta Sans", system-ui, sans-serif';
+    Chart.defaults.font.family = '"DM Sans", system-ui, sans-serif';
     Chart.defaults.color = css("--ink-2");
     charts[id] = new Chart(canvas, config);
   }

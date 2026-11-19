@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en" data-login="{{ url_for('login') }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project JAL · Smart water management</title>
+  <meta name="description" content="Project JAL: a solar canopy that harvests rainwater into five linked tanks and shares solar energy with the village.">
+  <noscript><meta http-equiv="refresh" content="0;url={{ url_for('login') }}"></noscript>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/intro.css') }}">
+  <script src="{{ url_for('static', filename='js/intro.js') }}"></script>
+</head>
+<body>
+<main class="intro" id="intro">
+  <canvas id="intro-canvas" aria-hidden="true"></canvas>
+
+  <a class="intro-skip" id="intro-skip" href="{{ url_for('login') }}">Skip intro</a>
+
+  <div class="intro-line" aria-hidden="true">
+    <span id="il1">Every drop</span>
+    <span id="il2">counts.</span>
+    <small id="il3">Water today · Power tomorrow</small>
+  </div>
+
+  <div class="intro-brand" id="intro-brand">
+    <span class="intro-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2.7s-6 6.6-6 11.1a6 6 0 0 0 12 0C18 9.3 12 2.7 12 2.7z"/></svg></span>
+    <h1 class="intro-word">JAL</h1>
+    <p class="intro-tag">Smart water management <i>·</i> Solar energy</p>
+    <div class="intro-actions">
+      <a class="glass-btn" id="intro-enter" href="{{ url_for('login') }}">Sign in</a>
+      <a class="intro-link" href="{{ url_for('register') }}">Create an account</a>
+    </div>
+  </div>
+
+  <div class="intro-reveal" id="intro-reveal" aria-hidden="true"></div>
+</main>
+</body>
+</html>

@@ -742,9 +742,15 @@ def page_context(active):
 # ---------------------------------------------------------------------------
 @app.route("/")
 def home():
-    if "user_id" not in session:
-        return redirect(url_for("login"))
-    return redirect(url_for("dashboard"))
+    # Signed-in users go straight to their dashboard; everyone else sees the opening intro,
+    # which plays once per browser session and then opens the sign-in page.
+    uid = session.get("user_id")
+    if uid is not None:
+        with db() as conn:
+            if conn.execute("SELECT 1 FROM users WHERE id=?", (uid,)).fetchone():
+                return redirect(url_for("dashboard"))
+        session.clear()  # old cookie for an account that no longer exists
+    return render_template("intro.html")
 
 
 @app.route("/register", methods=["GET", "POST"])

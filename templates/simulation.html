@@ -7,7 +7,7 @@
   <title>Simulation · Project JAL</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body data-page="simulation">
@@ -17,6 +17,7 @@
   <main class="main">
     <div class="page-head">
       <div>
+        <div class="eyebrow">{{ site.name }}</div>
         <h1>Simulation</h1>
         <p>Record rainfall, solar generation and village water use for <strong>{{ site.name }}</strong>. Entries can be backdated; tank levels are recalculated in date order.</p>
       </div>
@@ -140,6 +141,7 @@
       <div class="stack" style="align-self:start">
       <div class="card">
         <div class="card-head"><div><h2>Live tank levels</h2><p id="sim-stored">Loading…</p></div></div>
+        {% include "_collectors.html" %}
         <div class="tanks" id="tanks"></div>
         <div class="flow-note"><span>Fill: one collector per tank, extra passes</span><span class="arrow">1 → 5</span><span>· Draw</span><span class="arrow">5 → 1</span></div>
         <p class="small muted" style="margin-top:16px">Extra water that Tank 5 can't hold is reported as overflow needing recharge/overflow handling. It is not counted as safe groundwater recharge.</p>
@@ -205,6 +207,7 @@
       </div>
       </div>
     </div>
+    {% include "_footer.html" %}
   </main>
 </div>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>

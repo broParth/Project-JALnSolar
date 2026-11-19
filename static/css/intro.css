@@ -1,0 +1,101 @@
+/* Project JAL — opening intro (the page at "/") */
+html, body { margin: 0; height: 100%; overflow: hidden; background: #041a30; }
+.intro {
+  position: fixed; inset: 0; color: #fff;
+  font-family: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+#intro-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* Dark edges, done by the browser's compositor instead of being redrawn every frame. */
+.intro::before {
+  content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(ellipse 75% 70% at 50% 46%, rgba(2, 12, 26, 0) 55%, rgba(2, 12, 26, .55) 100%);
+}
+
+/* Shared liquid-glass surface */
+.glass-btn, .intro-skip {
+  background: rgba(255, 255, 255, .12);
+  border: 1px solid rgba(255, 255, 255, .34);
+  -webkit-backdrop-filter: blur(14px) saturate(1.6);
+  backdrop-filter: blur(14px) saturate(1.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), inset 0 -1px 0 rgba(255, 255, 255, .08), 0 12px 32px rgba(0, 18, 40, .28);
+  color: #fff; text-decoration: none; border-radius: 999px;
+  transition: background .25s, transform .25s, box-shadow .25s;
+}
+.intro-skip.gone { opacity: 0 !important; visibility: hidden; transition: opacity .4s, visibility 0s .4s; }
+.glass-btn:hover, .intro-skip:hover { background: rgba(255, 255, 255, .2); transform: translateY(-1px); }
+.glass-btn:focus-visible, .intro-skip:focus-visible, .intro-link:focus-visible { outline: 2px solid #bceeff; outline-offset: 3px; }
+
+.intro-skip {
+  position: absolute; top: 22px; right: 24px; z-index: 4;
+  padding: 9px 18px; background: rgba(8, 40, 70, .45); -webkit-backdrop-filter: none; backdrop-filter: none; font-size: 13px; font-weight: 600; letter-spacing: .02em;
+  opacity: 0; animation: introFade .8s .6s forwards;
+}
+
+/* Close-up tagline */
+.intro-line {
+  position: absolute; left: 57%; top: 50%; transform: translateY(-50%); z-index: 2;
+  font-family: "Manrope", "DM Sans", sans-serif; pointer-events: none;
+}
+.intro-line span {
+  display: block; font-weight: 800; font-size: clamp(36px, 5.4vw, 76px); line-height: 1.02; letter-spacing: -.045em;
+  opacity: 0; transform: translateY(18px); filter: blur(6px);
+  transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1), filter .8s;
+  text-shadow: 0 6px 30px rgba(0, 20, 45, .35);
+}
+.intro-line span + span { color: #9fe3ff; }
+.intro-line small {
+  display: block; margin-top: 18px; font-family: "DM Sans", sans-serif; font-size: 13px; font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase; color: #bceeff;
+  opacity: 0; transform: translateY(10px); transition: opacity .8s, transform .8s;
+}
+.intro-line .show { opacity: 1; transform: none; filter: none; }
+
+/* Brand lock-up after the splash */
+.intro-brand {
+  position: absolute; left: 50%; top: 42%; z-index: 3; width: min(560px, calc(100% - 32px));
+  transform: translate(-50%, -44%); text-align: center;
+  opacity: 0; pointer-events: none; transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1);
+}
+.intro-brand.show { opacity: 1; transform: translate(-50%, -50%); pointer-events: auto; }
+.intro-mark {
+  display: inline-grid; place-items: center; width: 58px; height: 58px; border-radius: 18px 18px 18px 6px;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .35);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 14px 34px rgba(0, 18, 40, .3);
+  transform: rotate(-8deg);
+}
+.intro-mark svg { width: 30px; height: 30px; transform: rotate(8deg); }
+.intro-word {
+  margin: 16px 0 6px; font-family: "Manrope", sans-serif; font-weight: 800;
+  font-size: clamp(58px, 9vw, 104px); line-height: 1; letter-spacing: -.07em;
+  background: linear-gradient(180deg, #ffffff 30%, #bfe9ff); -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 8px 30px rgba(0, 20, 45, .35));
+}
+.intro-tag { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase; color: #bceeff; }
+.intro-tag i { font-style: normal; color: #6fd0ff; padding: 0 4px; }
+.intro-actions { display: flex; gap: 18px; justify-content: center; align-items: center; flex-wrap: wrap; margin-top: 30px; }
+.glass-btn { display: inline-block; padding: 13px 34px; font-weight: 700; font-size: 15px; letter-spacing: .01em; }
+.intro-link { color: #d5efff; font-size: 14px; font-weight: 600; text-decoration: none; border-bottom: 1px solid rgba(213, 239, 255, .4); padding-bottom: 2px; }
+.intro-link:hover { color: #fff; border-color: #fff; }
+
+/* Ripple wipe into the sign-in page */
+.intro-reveal {
+  position: absolute; inset: 0; z-index: 5; pointer-events: none; background: #f4f7fb;
+  clip-path: circle(0 at var(--x, 50%) var(--y, 76%));
+  transition: clip-path .85s cubic-bezier(.7, 0, .25, 1);
+}
+.intro-reveal.go { clip-path: circle(160vmax at var(--x, 50%) var(--y, 76%)); }
+
+@keyframes introFade { to { opacity: 1; } }
+
+@media (max-width: 760px) {
+  .intro-line { left: 0; right: 0; top: auto; bottom: 12%; transform: none; text-align: center; }
+  .intro-line small { letter-spacing: .16em; font-size: 12px; }
+  .intro-skip { top: 14px; right: 14px; }
+  .intro-tag { font-size: 11.5px; letter-spacing: .14em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-skip { animation: none; opacity: 1; }
+  .intro-brand, .intro-line span, .intro-reveal { transition: none; }
+}

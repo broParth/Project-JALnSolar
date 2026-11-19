@@ -7,7 +7,7 @@
   <title>History · Project JAL</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body data-page="history">
@@ -17,6 +17,7 @@
   <main class="main">
     <div class="page-head">
       <div>
+        <div class="eyebrow">{{ site.name }}</div>
         <h1>Event history</h1>
         <p>Every entry for <strong>{{ site.name }}</strong>, newest date first.</p>
       </div>
@@ -60,6 +61,7 @@
       </div>
       <p class="small muted" style="margin-top:12px">Deleting an entry recalculates the tank levels and battery as if it had never happened.</p>
     </div>
+    {% include "_footer.html" %}
   </main>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
