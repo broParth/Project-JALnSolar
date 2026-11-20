@@ -81,7 +81,9 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #041a30; }
 
 /* Ripple wipe into the sign-in page */
 .intro-reveal {
-  position: absolute; inset: 0; z-index: 5; pointer-events: none; background: #f4f7fb;
+  position: absolute; inset: 0; z-index: 5; pointer-events: none;
+  /* same colours as the sign-in page's background, so the wipe flows straight into it */
+  background: linear-gradient(180deg, #07172a, #10304d 45%, #245a7d 70%, #1d4a3a);
   clip-path: circle(0 at var(--x, 50%) var(--y, 76%));
   transition: clip-path .85s cubic-bezier(.7, 0, .25, 1);
 }

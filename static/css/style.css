@@ -358,6 +358,40 @@ tr:last-child td { border-bottom: 0; }
 .auth-switch { margin-top: 18px; text-align: center; font-size: 14px; color: var(--ink-2); }
 .auth-replay { margin-top: 10px; text-align: center; font-size: 12.5px; }
 .auth-replay a { color: var(--muted); }
+
+/* Sign-in scene: storm clearing over the fields (drawn by sky.js), with the headline on the sky
+   and the form on frosted glass. The page colour matches the intro so there's no flash in between. */
+body.auth-page { background: linear-gradient(180deg, #07172a, #10304d 45%, #245a7d 70%, #1d4a3a); background-attachment: fixed; }
+#auth-sky { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; display: block; }
+.auth-page .auth { position: relative; z-index: 1; gap: 24px; padding: 28px; }
+.auth-page .auth-art { background: none; padding: 28px 24px; overflow: visible; }
+.auth-page .auth-art::after { display: none; }
+.auth-page .auth-art h1, .auth-page .auth-art p, .auth-page .auth-points { text-shadow: 0 2px 18px rgba(2, 14, 28, .55); }
+.auth-page .auth-art svg.art {
+  padding: 14px; border-radius: 20px;
+  background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .16);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .18);
+}
+.auth-page .auth-form { padding: 24px 8px; }
+.auth-page .auth-card {
+  max-width: 430px; padding: 34px 32px; border-radius: 22px;
+  background: rgba(246, 250, 253, .4); border: 1px solid rgba(255, 255, 255, .55);
+  /* brightness lifts the dark sky seen through the glass so the dark text keeps enough contrast */
+  -webkit-backdrop-filter: blur(20px) saturate(1.4) brightness(1.35); backdrop-filter: blur(20px) saturate(1.4) brightness(1.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 24px 60px rgba(2, 20, 40, .35);
+}
+.auth-page .auth-card input { background: rgba(255, 255, 255, .92); }
+/* The card is 40% opaque, so the storm clouds make its top half mid-grey. Text and links on it are
+   near-black navy so they stay above the 4.5:1 readability standard everywhere on the card. */
+.auth-page .auth-card h2, .auth-page .auth-card .sub, .auth-page .auth-switch, .auth-page .auth-card label { color: #0f2236; }
+.auth-page .auth-card .hint { color: #23384d; }
+.auth-page .auth-card a, .auth-page .auth-replay a { color: #08305e; text-decoration: underline; }
+@media (max-width: 860px) {
+  .auth-page .auth { padding: 14px; gap: 6px; }
+  .auth-page .auth-art { padding: 18px 10px 6px; }
+  .auth-page .auth-form { padding: 6px 0 24px; }
+  .auth-page .auth-card { padding: 26px 20px; }
+}
 /* Sign-in page settles in after the intro's ripple wipe (same pale background). */
 @media (prefers-reduced-motion: no-preference) {
   .auth-art { animation: authArtIn .8s cubic-bezier(.2,.8,.2,1) both; }
